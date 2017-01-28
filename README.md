@@ -1,12 +1,8 @@
-delta_PCA_kmeans
+Clustering of Delta airlines fleet has been done in the project
 ================
 
-Principal Components Analysis & K-means Clustering of Delta Fleet data
-Myles Harrison
-http://www.everydayanalytics.ca
+Authors: Hwansoo Joo, Ji Eun Seo, Rahul Gaur, Atul Shukla
 
-Data from delta.com:
+Data has been taken from delta.com:
 http://www.delta.com/content/www/en_US/traveling-with-us/airports-and-aircraft/Aircraft.html
-
-Backlink:
-http://www.everydayanalytics.ca/2014/06/pca-and-k-means-clustering-of-delta-aircraft.html
+and made into a csv file
