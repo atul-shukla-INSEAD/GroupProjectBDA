@@ -1,8 +1,7 @@
 # Delta Airlines Fleet segmentation
 # Author: Hwansoo Joo / Ji Eun Seo / Rahul Gaur / Atul Shukla
 # Date: 28-01-2017
-# Data from Delta.com:
-# http://www.delta.com/content/www/en_US/traveling-with-us/airports-and-aircraft/Aircraft.html
+# Data from Delta.com
 
 data <- read.csv(file="delta.csv", header=T, sep=",", row.names=1)
 
