@@ -6,25 +6,141 @@ Data: "from Delta.com"
 output: html_document
 ---
 
+#The Business Problem
+
+Due to their aging fleet and ever changing strategies (market forced), Airlines are often on a look out to expand their fleet. There is such a big variety and complexity in the airplane model specific data (as projected on the webpages of the flight operator), that it creates an illusion of the wide breadth of the fleet. BUt is it merely an illusion ? are the planes so dissimilar ? if not then which are similar and which are not ?
+
+The idea is to evaluate fleet of one of the airlines on certain parameters and then try to create clusters which are mutually exclusive but completely exhaustive. The airline being evaluated is: Delta Airlines
+
+#Solution Steps:
+
+# Step 1
+Collect the information about each of the plane model that the airline operates with and form a uncluttered but exhautive data file.
+Find the data source, which in this case is webpage of Delta Airlines:
+http://www.delta.com/content/www/en_US/traveling-with-us/airports-and-aircraft/Aircraft.html
+
+#Step 2
+Decide on the parameters and the airplane models:
+In this case, we collected information on the 44 aircraft models, namely:
+
+1. Airbus A319
+2. Airbus A319 VIP
+3. Airbus A320
+4. Airbus A320 32-R
+5. Airbus A330-200
+6. Airbus A330-200 (3L2)
+7. Airbus A330-200 (3L3)
+8. Airbus A330-300
+9. Boeing 717
+10. Boeing 737-700 (73W)
+11. Boeing 737-800 (738)
+12. Boeing 737-800 (73H)
+13. Boeing 737-900ER (739)
+14. Boeing 747-400 (74S)
+15. Boeing 757-200 (75A)
+16. Boeing 757-200 (75E)
+17. Boeing 757-200 (75M)
+18. Boeing 757-200 (75N)
+19. Boeing 757-200 (757)
+20. Boeing 757-200 (75V)
+21. Boeing 757-200 (75X)
+22. Boeing 757-300
+23. Boeing 767-300 (76G)
+24. Boeing 767-300 (76L)
+25. Boeing 767-300 (76P)
+26. Boeing 767-300 (76Q)
+27. Boeing 767-300 (76T)
+28. Boeing 767-300 (76U)
+29. Boeing 767-300 (76Z V.1)
+30. Boeing 767-300 (76Z V.2)
+31. Boeing 767-400 (76D)
+32. Boeing 777-200ER
+33. Boeing 777-200LR
+34. CRJ 100/200 Pinnacle/SkyWest
+35. CRJ 100/200 ExpressJet
+36. CRJ 700
+37. CRJ 900
+38. E120
+39. E170
+40. E175
+41. ERJ-145
+42. MD-88
+43. MD-90
+44. MD-DC9-50
+
+Then we evaluated those against 33 parameters, namely:
+
+1. Seat Width (Club)	
+2. Seat Pitch (Club)	
+3. Seat (Club)	
+4. Seat Width (First Class)	
+5. Seat Pitch (First Class)	
+6. Seats (First Class)	
+7. Seat Width (Business)	
+8. Seat Pitch (Business)	
+9. Seats (Business)	
+10. Seat Width (Eco Comfort)	
+11. Seat Pitch (Eco Comfort)	
+12. Seats (Eco Comfort)	
+13. Seat Width (Economy)	
+14. Seat Pitch (Economy)	
+15. Seats (Economy)	
+16. Accommodation	
+17. Cruising Speed (mph)	
+18. Range (miles)	
+19. Engines (numbers)
+20. Wingspan (ft)	
+21. Tail Height (ft)	
+22. Length (ft)	
+23. Wifi	
+24. Video	
+25. Power	
+26. Satellite	
+27. Flat-bed	
+28. Sleeper	
+29. Club	
+30. First Class	
+31. Business	
+32. Eco Comfort	
+33. Economy
+
+The paramaters(variables), as mentioned above, include both quantitative measures on attributes like cruising speed, accommodation and range in miles, as well as categorical data on, say, whether a particular aircraft has Wi-Fi or video. 
+These binary categorical variables were transformed into quantitative variables by assigning them values of either 1 or 0, for yes or no respectively.
+
+
+#Step 3: Correlation Analysis
+
+Since the numbers of variables (parameters) are high, then we decided to use the "reduction method" to make the it easier to visualise and analyse the information. 
+
+We start with looking at the intermediary quantitative variables related to the aircraft physical characteristics: cruising speed, total accommodation, and other quantities like length and wingspan. 
+These variables are about in the middle of the data frame, so we can visualize all of them at once using a scatterplot matrix, which is the default for R's output if plot() is called on a dataframe.
+
 ```{r setup, include=FALSE}
 data <- read.csv(file="delta.csv", header=T, sep=",", row.names=1)
 ```
 
-# scatterplot matrix of intermediary (size/non-categorical) variables
+scatterplot matrix of intermediary (size/non-categorical) variables
 
 ```{r}
 plot(data[,16:22])
 ```
 
-## # Naively apply principal components analysis to raw data and plot
+We can see that there are pretty strong positive correlations between all these variables, as all of them are related to the aircraft's overall size. Remarkably there is an almost perfectly linear relationship between wingspan and tail height.
+
+The exception here is the variable right in the middle which is the number of engines. There is one lone outlier [Boeing 747-400 (74S)] which has four, while all the other aircraft have two. 
+
+
+# Reduce the information further using "Principal components analysis (PCA)" analysis to raw data and plot
 
 
 ```{r}
 pc <- princomp(data)
 plot(pc)
 ```
+Taking that approach we can see that the first principal component has a standard deviation of around 2200 and accounts for over 99.8% of the variance in the data. Looking at the first column of loadings, we see that the first principle component is just the range in miles.
 
-# First component dominates greatly. What are the loadings?
+
+First component dominates greatly. What are the loadings?
 ```{r}
 summary(pc) # 1 component has > 99% variance
 ```
@@ -34,7 +150,11 @@ summary(pc) # 1 component has > 99% variance
 loadings(pc) # Can see all variance is in the range in miles 
 ```
 
-# verify by plotting variance of columns
+This is because the scale of the different variables in the data set is quite variable. 
+we can see this by plotting the variance of the different columns in the data frame.
+First, we plot those on the regular scaling and then carry on the plotting on the logarithmic scale. 
+
+# plot the variance of columns
 
 ```{r}
 mar <- par()$mar
@@ -45,6 +165,8 @@ barplot(sapply(data, var), horiz=T, las=1, cex.names=0.8)
 ```{r}
 barplot(sapply(data, var), horiz=T, las=1, cex.names=0.8, log='x')
 ```
+Now, we correct for this by scaling the data using the scale() function. 
+We can then verify that the variances across the different variables are equal so that when we apply principal components one variable does not dominate. 
 
 ```{r}
 par(mar=mar)
@@ -53,6 +175,9 @@ data2 <- data.frame(scale(data))
 # Verify variance is uniform
 plot(sapply(data2, var))
 ```
+
+Now we can apply principal components to the scaled data. Note that this can also be done automatically in call to the prcomp() function by setting the parameter scale=TRUE. 
+Now we see a result which is more along the lines of something we would expect: 
 
 ```{r}
 # Proceed with principal components
@@ -63,13 +188,18 @@ plot(pc)
 ```{r}
 plot(pc, type='l')
 ```
+There are various rules for selecting the number of principal components to retain in an analysis of this type, two which we though of using were: 
+1. Pick the number of components which explain 85% or greater of the variation
+2. Use the 'elbow' method of the scree plot (on right)
+Here, fortunately these two are the same, so we will retain the first four principal components. We put these into new data frame and plot.
 
 ```{r}
 summary(pc) # 4 components is both 'elbow' and explains >85% variance
 ```
 
+
 ```{r}
-# Get principal component vectors using prcomp instead of princomp
+# Get principal component vectors using prcomp
 pc <- prcomp(data2)
 
 # First for principal components
@@ -77,20 +207,40 @@ comp <- data.frame(pc$x[,1:4])
 # Plot
 plot(comp, pch=16, col=rgb(0,0,0,0.5))
 ```
+So what we are looking above are twelve 2-D projections of data. We can see there's a clear outlier in all the dimensions, as well as some bunching together in the different projections. 
+
+Since there is bundling of the projections (due to collapising of a 3D projection to a 2D image), We found that to have better meaning in the data visualization, we could use 3D visualization method. This would make visualization interactive, allowing to explore the space and not lose meaning. But this works only in HTML file.
+
+Thus we downloaded the "rgl package""
+
 
 ```{r}
 library(rgl)
 # Multi 3D plot
 plot3d(comp$PC1, comp$PC2, comp$PC3)
 plot3d(comp$PC1, comp$PC3, comp$PC4)
+```
 
-# Determine the correct number of clusters via weighted sum of squares
+To view the interactive 3D versions, we can click on the projections. WE can better see in the 3D projections that the data are confined mainly to the one plane one the left (components 1-3), with the exception of the outlier, and that there is also bunching in the other dimensions (components 1,3,4 on right).
 
+#Step 4: Cluster Analysis
+
+Now that we've simplified the complex data set into a lower dimensional space we can visualize and work with, how do we find patterns in the data ? 
+in our case, the aircraft which are most similar? We can use a simple machine learning technique like "clustering".
+
+To determine the number of clusters, we decided to look at the within groups sum of squares and pick the 'elbow' in the plot, similar to as with the scree plot we did for the PCA previously. 
+
+Determine the correct number of clusters via weighted sum of squares
+
+```{r}
 wss <- (nrow(comp)-1)*sum(apply(comp,2,var))
 for (i in 2:15) wss[i] <- sum(kmeans(comp, centers=i, nstart=100, iter.max=1000)$withinss)
 plot(1:15, wss, type="b", xlab="Number of Clusters",
      ylab="Within groups sum of squares")
 ```
+
+
+Here we can see that the "elbow" in the scree plot is at k=4, so we apply the k-means clustering function with k = 4 and plot.
 
 ```{r}
 # From scree plot elbow occurs at k = 4
@@ -102,11 +252,18 @@ palette(alpha(brewer.pal(9,'Set1'), 0.5))
 plot(comp, col=k$clust, pch=16)
 ```
 
+We can see that the one outlier is in its own cluster, there's 3 or 4 in the other and the remainder are split into two clusters of greater size. 
+We visualize in 3D below, as before.
+
 ```{r}
 # 3D plot
 plot3d(comp$PC1, comp$PC2, comp$PC3, col=k$clust)
 plot3d(comp$PC1, comp$PC3, comp$PC4, col=k$clust)
+```
 
+We look at the exact clusters below, in order of increasing size:
+
+```{r}
 # Cluster sizes
 sort(table(k$clust))
 ```
@@ -133,6 +290,14 @@ row.names(data[k$clust==clust[3],])
 row.names(data[k$clust==clust[4],])
 ```
 
+#Step 5: Interpretation
+1. The first cluster contains a single aircraft, the Airbus A319 VIP. This is a plane for people with money, for private charter. It includes "club seats" around tables for working. This is apparently the plane highly valued professional sports teams and the importants corporates or delegates often charter to fly.
+
+2. The second cluster contains four aircraft - the two CRJ 100/200's and the Embraer E120 and ERJ-145. These are the smallest passenger aircraft, with the smallest accommodations - 28 for the E120 and 50 for the remaining craft. As such, there is only economy seating in these planes which is what distinguishes them from the remainder of the fleet. 
+
+3 and 4. The other two clusters comprise the remainder of the fleet, the planes with which most commercial air travellers are familiar - your Boeing 7-whatever-7's and other Airbus planes. These are split into two clusters, which seem to again divide the planes approximately by size (both physical and accommodation).
+
+
 ```{r}
 # Compare accommodation by cluster in boxplot
 boxplot(data$Accommodation ~ k$cluster, 
@@ -149,3 +314,25 @@ data[k$clust==clust[3],30:33]
 data[k$clust==clust[4],30:33]
 ```
 
+Looking at the raw data and the cluster analysis, one other difference between the largest two clusters is that all the aircraft in the one have first class seating, whereas all the planes in the other have business class instead [the one exception} Boeing 767-300 (76U).
+
+#Step 6: Conclusions
+
+1. We were able to separate out the different type of aircraft into distinct categories and form 4 broad clusters.
+2. Depending upon the mid-term and long-term strategy of the airline, it can focus on one of the clusters and chose to lease plan from that cluster, primarliry basing on efficiency, price and safety reputation. No need to be worry too much about the specifications details if the selected model is in the same cluster.
+3. There is small disclaimer: analysis is based on our interpretation of the data (both quantitative and qualitative), and so the results may change if the data is structured differently.
+
+# References:
+Delta Fleet at Delta.com
+http://www.delta.com/content/www/en_US/traveling-with-us/airports-and-aircraft/Aircraft.html
+
+Principal Components Analysis:
+http://en.wikipedia.org/wiki/Principal_components_analysis
+
+The Little Book of R for Multivariate Analysis
+http://little-book-of-r-for-multivariate-analysis.readthedocs.org/en/latest/src/multivariateanalysis.html
+
+Quick R: Cluster Analysis
+http://www.statmethods.net/advstats/cluster.html
+
+In-class exercises: Boats segmentation case
