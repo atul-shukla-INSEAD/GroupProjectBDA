@@ -314,11 +314,7 @@ boxplot(data$Accommodation ~ k$cluster,
 Delta Fleet at Delta.com
 http://www.delta.com/content/www/en_US/traveling-with-us/airports-and-aircraft/Aircraft.html
 
-Principal Components Analysis:
-http://en.wikipedia.org/wiki/Principal_components_analysis
-
-The Little Book of R for Multivariate Analysis
-http://little-book-of-r-for-multivariate-analysis.readthedocs.org/en/latest/src/multivariateanalysis.html
+Principal Components Analysis - PCA Analysis
 
 Quick R: Cluster Analysis
 http://www.statmethods.net/advstats/cluster.html
